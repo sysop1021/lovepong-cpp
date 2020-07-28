@@ -31,7 +31,7 @@ int main()
 
     sf::RectangleShape p2;
     p2.setSize(paddleSize);
-    p2.setPosition(WINDOW_WIDTH - 30, WINDOW_HEIGHT - 150);
+    p2.setPosition(WINDOW_WIDTH - 30 - paddleSize.x, WINDOW_HEIGHT - 150);
 
     sf::RectangleShape ball;
     ball.setSize(ballSize);
