@@ -1,11 +1,12 @@
 /**
- *  Okay, so I got ahead of myself with the
- *  FPS counter, but it was fun. :D
- *
+ *  pong-4 - The Ball Update
+ *  get ball moving in random direction
+ *  on change from Start State to Play State
  */
 
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
+#include <string>               // game state identifier - should probably use c-strings
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
@@ -14,45 +15,51 @@ const int PADDLE_SPEED = 600;
 
 int main()
 {
-    // window setup
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-3");
+    /** Initialization **/
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-4");
     window.setFramerateLimit(60);
+    srand(time(0));
+    std::string gameState = "start";
 
-    // Declare and load our font
+    /* Font/Text setup */
     sf::Font font;
     font.loadFromFile("font.ttf");
 
-    // text setup gubbins
-    sf::Text text("Hello, Pong!", font);
+    sf::Text text("Hello, " + gameState + "!", font);
     text.setCharacterSize(TEXT_SIZE);
     // get a rect of the text so we can halve it for centering
     sf::FloatRect textBox = text.getGlobalBounds();
     text.setPosition((WINDOW_WIDTH / 2 - (textBox.width / 2)), 60);
 
-
     // window bg color
     sf::Color color(40, 45, 52);
 
-    // default values
-    sf::Vector2f paddleSize(15, 60);
-    sf::Vector2f ballSize(12, 12);
-    float player1Y = 90;
-    float player2Y = WINDOW_HEIGHT - 150;
+    /* Paddle setup */
+    sf::Vector2f paddleSize(15.f, 60.f);
+    sf::Vector2f ballSize(12.f, 12.f);
+    float player1Y = 90.f;
+    float player2Y = WINDOW_HEIGHT - 150.f;
 
-    // factor out yPos to variables for movement
     sf::RectangleShape p1;
     p1.setSize(paddleSize);
-    p1.setPosition(30, player1Y);
+    p1.setPosition(30.f, player1Y);
 
     sf::RectangleShape p2;
     p2.setSize(paddleSize);
-    p2.setPosition(WINDOW_WIDTH - 30, player2Y);
+    p2.setPosition(WINDOW_WIDTH - 30.f, player2Y);
 
+    /* Ball setup */
     sf::RectangleShape ball;
     ball.setSize(ballSize);
-    ball.setPosition(((WINDOW_WIDTH / 2) - (ballSize.x / 2)), (WINDOW_HEIGHT / 2 - (ballSize.y / 2)));
+    sf::Vector2f ballPos(((WINDOW_WIDTH / 2) - (ballSize.x / 2)), (WINDOW_HEIGHT / 2 - (ballSize.y / 2)));
+    ball.setPosition(ballPos.x, ballPos.y);
 
-    // score inits
+    // a total mess, honestly
+    // randInSomeRange = (rand() % (max-min + 1)) + min;
+    float ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
+    float ballDY = (rand() % (150 + 150 + 1)) - 150;
+
+    /* Scoreboard setup */
     unsigned short player1score = 0;
     unsigned short player2score = 0;
 
@@ -61,7 +68,7 @@ int main()
     sf::Text p2scoreboard(std::to_string(player2score), font, 100);
     p2scoreboard.setPosition(WINDOW_WIDTH / 2 + 90, WINDOW_HEIGHT / 3);
 
-    // FPS counter stuff
+    /* FPS Counter setup */
     sf::Text fpsCtr("FPS:", font, 25);
     fpsCtr.setFillColor(sf::Color::Green);
     fpsCtr.setPosition(5.f, 5.f);
@@ -72,7 +79,7 @@ int main()
 
     sf::Clock clock;
 
-    // "game" loop, such as it is
+    /** Game Loop **/
     while (window.isOpen())
     {
         sf::Time dt = clock.restart();
@@ -81,47 +88,81 @@ int main()
         while (window.pollEvent(event))
 
         {
+            /* Game exit on Esc */
             if ((event.type == sf::Event::Closed) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
             {
                 window.close();
             }
 
+
+            /* Show FPS overlay on F11 */
             if ((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F11))
             {
                 showDebug = !showDebug;
             }
 
+            /* Toggle game state on Enter */
+            if ((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter))
+            {
+                if (gameState == "start")
+                {
+                    gameState = "play";
+                    text.setString("Hello, " + gameState + "!");
+                }
+
+                else
+                {
+                    gameState = "start";
+                    text.setString("Hello, " + gameState + "!");
+
+                    // reset ball to starting position and speed
+                    ballPos.x = ((WINDOW_WIDTH / 2) - (ballSize.x / 2));
+                    ballPos.y =  (WINDOW_HEIGHT / 2 - (ballSize.y / 2));
+                    ball.setPosition(ballPos.x, ballPos.y);
+
+                    float ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
+                    float ballDY = (rand() % (150 + 150 + 1)) - 150;
+
+                }
+            }
+
         }
 
         // handle input
-        // TODO: MB: ok, so, originally i had this stuck inside the while-pollevent loop, and these were similar
-        // sf::EventType::KeyPressed checks - it did some weird blocking call thing - one of the SFML books talked
-        // about that and I didn't understand at the time - need to go back and read that so i grok it
-         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        // these silly long tertiary expressions mean I can get rid of #include <algorithm>
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
-            player1Y = player1Y - PADDLE_SPEED * dt.asSeconds();
+            player1Y = (0.f > player1Y - PADDLE_SPEED * dt.asSeconds() ? 0.f : player1Y - PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
-            player1Y = player1Y + PADDLE_SPEED * dt.asSeconds();
+            player1Y = (WINDOW_HEIGHT - (paddleSize.y) < player1Y + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - (paddleSize.y) : player1Y + PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
         {
-            player2Y -= PADDLE_SPEED * dt.asSeconds();
+            player2Y = (0.f > player2Y - PADDLE_SPEED * dt.asSeconds() ? 0.f : player2Y - PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         {
-            player2Y += PADDLE_SPEED * dt.asSeconds();
+            player2Y = (WINDOW_HEIGHT - (paddleSize.y) < player2Y + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - (paddleSize.y) : player2Y + PADDLE_SPEED * dt.asSeconds());
         }
 
-        // update
+        /** Update **/
         p1.setPosition(30, player1Y);
         p2.setPosition(WINDOW_WIDTH - 30, player2Y);
 
-        // draw
+        if (gameState == "play")
+        {
+            ballPos.x += ballDX * dt.asSeconds();
+            ballPos.y += ballDY * dt.asSeconds();
+        }
+
+        ball.setPosition(ballPos.x, ballPos.y);
+
+        /** Draw **/
         window.clear(color);
         window.draw(text);
         window.draw(p1scoreboard);
