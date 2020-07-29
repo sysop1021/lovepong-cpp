@@ -1,9 +1,3 @@
-/**
- *  pong-4 - The Ball Update
- *  get ball moving in random direction
- *  on change from Start State to Play State
- */
-
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
@@ -13,11 +7,12 @@ const int WINDOW_HEIGHT = 720;
 const int TEXT_SIZE = 24;
 const int PADDLE_SPEED = 600;
 
-int main()
+int main(int argc, char* argv[])
 {
     /** Initialization **/
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-4");
     window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(true);
     srand(time(0));
     std::string gameState = "start";
 
@@ -25,7 +20,7 @@ int main()
     sf::Font font;
     font.loadFromFile("font.ttf");
 
-    sf::Text text("Hello, " + gameState + "!", font);
+    sf::Text text("Hello, " + gameState + " state!", font);
     text.setCharacterSize(TEXT_SIZE);
     // get a rect of the text so we can halve it for centering
     sf::FloatRect textBox = text.getGlobalBounds();
@@ -75,6 +70,7 @@ int main()
 
     bool showDebug = false;
 
+    // Used as a buffer timer so we don't update the FPS counter every frame
     float smoothTimer;
 
     sf::Clock clock;
@@ -107,21 +103,21 @@ int main()
                 if (gameState == "start")
                 {
                     gameState = "play";
-                    text.setString("Hello, " + gameState + "!");
+                    text.setString("Hello, " + gameState + " state!");
                 }
 
                 else
                 {
                     gameState = "start";
-                    text.setString("Hello, " + gameState + "!");
+                    text.setString("Hello, " + gameState + " state!");
 
                     // reset ball to starting position and speed
                     ballPos.x = ((WINDOW_WIDTH / 2) - (ballSize.x / 2));
                     ballPos.y =  (WINDOW_HEIGHT / 2 - (ballSize.y / 2));
                     ball.setPosition(ballPos.x, ballPos.y);
 
-                    float ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
-                    float ballDY = (rand() % (150 + 150 + 1)) - 150;
+                    ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
+                    ballDY = (rand() % (150 + 150 + 1)) - 150;
 
                 }
             }
@@ -129,7 +125,7 @@ int main()
         }
 
         // handle input
-        // these silly long tertiary expressions mean I can get rid of #include <algorithm>
+        // these silly long tertiary expressions mean I can now get rid of #include <algorithm>
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             player1Y = (0.f > player1Y - PADDLE_SPEED * dt.asSeconds() ? 0.f : player1Y - PADDLE_SPEED * dt.asSeconds());
@@ -171,12 +167,6 @@ int main()
         window.draw(p2);
         window.draw(ball);
 
-        // fps counter gubbins
-        if (showDebug)
-        {
-            window.draw(fpsCtr);
-        }
-
         int fps = ceil(1.f / dt.asSeconds());
         smoothTimer += dt.asMilliseconds();
 
@@ -184,6 +174,11 @@ int main()
         {
             fpsCtr.setString("FPS: " + std::to_string(fps));
             smoothTimer = 0.f;
+        }
+
+        if (showDebug)
+        {
+            window.draw(fpsCtr);
         }
 
         window.display();
