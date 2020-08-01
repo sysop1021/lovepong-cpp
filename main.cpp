@@ -2,17 +2,30 @@
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
 
+#include "Ball.h"
+#include "Paddle.h"
+
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
-const int TEXT_SIZE = 24;
 const int PADDLE_SPEED = 600;
+const float PADDLE_WIDTH = 15.f;
+const float PADDLE_HEIGHT = 60.f;
+const float PLAYER1Y = 90.f;
+const float PLAYER2Y = WINDOW_HEIGHT - 150.f;
+const float PADDLE_X_OFFSET = 30.f;
+const float BALL_SIZE = 12.f;
+const int TEXT_SIZE = 24; // TODO: MB: remove?
 
 int main(int argc, char* argv[])
 {
     /** Initialization **/
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-4");
+    /* Window Setup */
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-5");
     window.setFramerateLimit(60);
-    window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
+    // window bg color
+    sf::Color color(40, 45, 52);
+
     srand(time(0));
     std::string gameState = "start";
 
@@ -22,37 +35,16 @@ int main(int argc, char* argv[])
 
     sf::Text text("Hello, " + gameState + " state!", font);
     text.setCharacterSize(TEXT_SIZE);
-    // get a rect of the text so we can halve it for centering
+
     sf::FloatRect textBox = text.getGlobalBounds();
     text.setPosition((WINDOW_WIDTH / 2 - (textBox.width / 2)), 60);
 
-    // window bg color
-    sf::Color color(40, 45, 52);
-
     /* Paddle setup */
-    sf::Vector2f paddleSize(15.f, 60.f);
-    sf::Vector2f ballSize(12.f, 12.f);
-    float player1Y = 90.f;
-    float player2Y = WINDOW_HEIGHT - 150.f;
-
-    sf::RectangleShape p1;
-    p1.setSize(paddleSize);
-    p1.setPosition(30.f, player1Y);
-
-    sf::RectangleShape p2;
-    p2.setSize(paddleSize);
-    p2.setPosition(WINDOW_WIDTH - 30.f, player2Y);
+    Paddle p1(PADDLE_X_OFFSET, PLAYER1Y, PADDLE_WIDTH, PADDLE_HEIGHT);
+    Paddle p2(WINDOW_WIDTH - PADDLE_X_OFFSET, PLAYER2Y, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     /* Ball setup */
-    sf::RectangleShape ball;
-    ball.setSize(ballSize);
-    sf::Vector2f ballPos(((WINDOW_WIDTH / 2) - (ballSize.x / 2)), (WINDOW_HEIGHT / 2 - (ballSize.y / 2)));
-    ball.setPosition(ballPos.x, ballPos.y);
-
-    // a total mess, honestly
-    // randInSomeRange = (rand() % (max-min + 1)) + min;
-    float ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
-    float ballDY = (rand() % (150 + 150 + 1)) - 150;
+    Ball ball(((WINDOW_WIDTH / 2) - (BALL_SIZE / 2)), (WINDOW_HEIGHT / 2 - (BALL_SIZE / 2)), BALL_SIZE, BALL_SIZE);
 
     /* Scoreboard setup */
     unsigned short player1score = 0;
@@ -60,6 +52,7 @@ int main(int argc, char* argv[])
 
     sf::Text p1scoreboard(std::to_string(player1score), font, 100);
     p1scoreboard.setPosition(WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 3);
+
     sf::Text p2scoreboard(std::to_string(player2score), font, 100);
     p2scoreboard.setPosition(WINDOW_WIDTH / 2 + 90, WINDOW_HEIGHT / 3);
 
@@ -90,7 +83,6 @@ int main(int argc, char* argv[])
                 window.close();
             }
 
-
             /* Show FPS overlay on F11 */
             if ((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F11))
             {
@@ -112,60 +104,51 @@ int main(int argc, char* argv[])
                     text.setString("Hello, " + gameState + " state!");
 
                     // reset ball to starting position and speed
-                    ballPos.x = ((WINDOW_WIDTH / 2) - (ballSize.x / 2));
-                    ballPos.y =  (WINDOW_HEIGHT / 2 - (ballSize.y / 2));
-                    ball.setPosition(ballPos.x, ballPos.y);
-
-                    ballDX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
-                    ballDY = (rand() % (150 + 150 + 1)) - 150;
-
+                    ball.reset();
                 }
             }
 
         }
 
-        // handle input
+        /** Handle Input **/
         // these silly long tertiary expressions mean I can now get rid of #include <algorithm>
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
-            player1Y = (0.f > player1Y - PADDLE_SPEED * dt.asSeconds() ? 0.f : player1Y - PADDLE_SPEED * dt.asSeconds());
+            p1.yPos = (0.f > p1.yPos - PADDLE_SPEED * dt.asSeconds() ? 0.f : p1.yPos - PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
-            player1Y = (WINDOW_HEIGHT - (paddleSize.y) < player1Y + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - (paddleSize.y) : player1Y + PADDLE_SPEED * dt.asSeconds());
+            p1.yPos = (WINDOW_HEIGHT - PADDLE_HEIGHT < p1.yPos + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - PADDLE_HEIGHT : p1.yPos + PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
         {
-            player2Y = (0.f > player2Y - PADDLE_SPEED * dt.asSeconds() ? 0.f : player2Y - PADDLE_SPEED * dt.asSeconds());
+            p2.yPos = (0.f > p2.yPos - PADDLE_SPEED * dt.asSeconds() ? 0.f : p2.yPos - PADDLE_SPEED * dt.asSeconds());
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         {
-            player2Y = (WINDOW_HEIGHT - (paddleSize.y) < player2Y + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - (paddleSize.y) : player2Y + PADDLE_SPEED * dt.asSeconds());
+            p2.yPos = (WINDOW_HEIGHT - PADDLE_HEIGHT < p2.yPos + PADDLE_SPEED * dt.asSeconds() ? WINDOW_HEIGHT - PADDLE_HEIGHT : p2.yPos + PADDLE_SPEED * dt.asSeconds());
         }
 
         /** Update **/
-        p1.setPosition(30, player1Y);
-        p2.setPosition(WINDOW_WIDTH - 30, player2Y);
+        p1.update();
+        p2.update();
 
         if (gameState == "play")
         {
-            ballPos.x += ballDX * dt.asSeconds();
-            ballPos.y += ballDY * dt.asSeconds();
+            ball.update(dt.asSeconds());
         }
-
-        ball.setPosition(ballPos.x, ballPos.y);
 
         /** Draw **/
         window.clear(color);
         window.draw(text);
         window.draw(p1scoreboard);
         window.draw(p2scoreboard);
-        window.draw(p1);
-        window.draw(p2);
-        window.draw(ball);
+        p1.render(window);
+        p2.render(window);
+        ball.render(window);
 
         int fps = ceil(1.f / dt.asSeconds());
         smoothTimer += dt.asMilliseconds();
