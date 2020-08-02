@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
     /* Paddle setup */
     Paddle p1(PADDLE_X_OFFSET, PLAYER1Y, PADDLE_WIDTH, PADDLE_HEIGHT);
-    Paddle p2(WINDOW_WIDTH - PADDLE_X_OFFSET, PLAYER2Y, PADDLE_WIDTH, PADDLE_HEIGHT);
+    Paddle p2(WINDOW_WIDTH - PADDLE_X_OFFSET - PADDLE_WIDTH, PLAYER2Y, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     /* Ball setup */
     Ball ball(((WINDOW_WIDTH / 2) - (BALL_SIZE / 2)), (WINDOW_HEIGHT / 2 - (BALL_SIZE / 2)), BALL_SIZE, BALL_SIZE);
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     bool showDebug = false;
 
     // Used as a buffer timer so we don't update the FPS counter every frame
-    float smoothTimer;
+    float smoothTimer = 0.f;
 
     sf::Clock clock;
 
@@ -106,7 +106,6 @@ int main(int argc, char* argv[])
                     ball.reset();
                 }
             }
-
         }
 
         /** Handle Input **/
@@ -149,6 +148,11 @@ int main(int argc, char* argv[])
         p2.render(window);
         ball.render(window);
 
+        if (showDebug)
+        {
+            window.draw(fpsCtr);
+        }
+
         int fps = ceil(1.f / dt.asSeconds());
         smoothTimer += dt.asMilliseconds();
 
@@ -156,12 +160,6 @@ int main(int argc, char* argv[])
         {
             fpsCtr.setString("FPS: " + std::to_string(fps));
             smoothTimer = 0.f;
-            std::cout << fps << std::endl;
-        }
-
-        if (showDebug)
-        {
-            window.draw(fpsCtr);
         }
 
         window.display();

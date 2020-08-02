@@ -43,4 +43,3 @@ void Ball::render(sf::RenderWindow& window)
 {
     window.draw(ball);
 }
-
