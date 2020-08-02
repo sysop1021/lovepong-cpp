@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 {
     /** Initialization **/
     /* Window Setup */
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-5");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-6");
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
     sf::Color color(40, 45, 52);
