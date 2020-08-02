@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
+#include <iostream>
 
 #include "Ball.h"
 #include "Paddle.h"
@@ -14,7 +15,7 @@ const float PLAYER1Y = 90.f;
 const float PLAYER2Y = WINDOW_HEIGHT - 150.f;
 const float PADDLE_X_OFFSET = 30.f;
 const float BALL_SIZE = 12.f;
-const int TEXT_SIZE = 24; // TODO: MB: remove?
+const int TEXT_SIZE = 24;
 
 int main(int argc, char* argv[])
 {
@@ -23,7 +24,6 @@ int main(int argc, char* argv[])
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-5");
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
-    // window bg color
     sf::Color color(40, 45, 52);
 
     srand(time(0));
@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
                     gameState = "start";
                     text.setString("Hello, " + gameState + " state!");
 
-                    // reset ball to starting position and speed
                     ball.reset();
                 }
             }
@@ -157,6 +156,7 @@ int main(int argc, char* argv[])
         {
             fpsCtr.setString("FPS: " + std::to_string(fps));
             smoothTimer = 0.f;
+            std::cout << fps << std::endl;
         }
 
         if (showDebug)
@@ -165,7 +165,6 @@ int main(int argc, char* argv[])
         }
 
         window.display();
-
     }
 
     return 0;

@@ -18,8 +18,6 @@ public:
 
     float xPos;
     float yPos;
-    //float width;
-    //float height;
     float dX;
     float dY;
 
