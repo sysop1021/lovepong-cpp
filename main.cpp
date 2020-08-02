@@ -1,3 +1,8 @@
+/**
+    pong-8: skipped for some reason
+
+*/
+
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
