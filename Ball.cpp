@@ -43,3 +43,20 @@ void Ball::render(sf::RenderWindow& window)
 {
     window.draw(ball);
 }
+
+bool Ball::checkCollision(Paddle& paddle)
+{
+    // this is full-on banana cakes
+    if( !(xPos > (paddle.xPos + paddle.size.x)) &&
+        !((xPos + size.x) < paddle.xPos) &&
+        !(yPos > (paddle.yPos + paddle.size.y)) &&
+        !((yPos + size.y) < paddle.yPos) )
+    {
+        return true;
+    }
+
+    else
+    {
+        return false;
+    }
+}

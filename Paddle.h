@@ -17,8 +17,6 @@ public:
 
     float xPos;
     float yPos;
-    float width;
-    float height;
     float dY;
 
 private:

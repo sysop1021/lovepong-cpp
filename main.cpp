@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
-#include <iostream>
 
 #include "Ball.h"
 #include "Paddle.h"
@@ -16,12 +15,13 @@ const float PLAYER2Y = WINDOW_HEIGHT - 150.f;
 const float PADDLE_X_OFFSET = 30.f;
 const float BALL_SIZE = 12.f;
 const int TEXT_SIZE = 24;
+const float SPEED_UP_FACTOR = 1.03f;
 
 int main(int argc, char* argv[])
 {
     /** Initialization **/
     /* Window Setup */
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-6");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-7");
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
     sf::Color color(40, 45, 52);
@@ -137,6 +137,50 @@ int main(int argc, char* argv[])
         if (gameState == "play")
         {
             ball.update(dt.asSeconds());
+
+            if (ball.checkCollision(p1))
+            {
+                ball.dX = -ball.dX * SPEED_UP_FACTOR;
+                ball.xPos = p1.xPos + p1.size.x;
+
+                if (ball.dY > 0)
+                {
+                    ball.dY = (rand() % (450 - 30 + 1) + 30);
+                }
+
+                else
+                {
+                    ball.dY = -(rand() % (450 - 30 + 1) + 30);
+                }
+            }
+
+            if (ball.checkCollision(p2))
+            {
+                ball.dX = -ball.dX * SPEED_UP_FACTOR;
+                ball.xPos = p2.xPos - ball.size.x;
+
+                if (ball.dY > 0)
+                {
+                    ball.dY = (rand() % (450 - 30 + 1) + 30);
+                }
+
+                else
+                {
+                    ball.dY = -(rand() % (450 - 30 + 1) + 30);
+                }
+            }
+
+            if (ball.yPos <= 0)
+            {
+                ball.yPos = 0;
+                ball.dY = -ball.dY;
+            }
+
+            if (ball.yPos + ball.size.y >= WINDOW_HEIGHT)
+            {
+                ball.yPos = WINDOW_HEIGHT - ball.size.y;
+                ball.dY = -ball.dY;
+            }
         }
 
         /** Draw **/

@@ -2,6 +2,7 @@
 #define BALL_H
 
 #include <SFML/Graphics.hpp>
+#include "Paddle.h"
 
 class Ball
 {
@@ -12,6 +13,7 @@ public:
     void update(float dt);
     void render(sf::RenderWindow& window);
     void reset();
+    bool checkCollision(Paddle& paddle);
 
     sf::RectangleShape ball;
     sf::Vector2f size;
