@@ -1,6 +1,6 @@
 /**
-    pong-8: skipped for some reason
-
+    pong-9: score update
+    serve goes away from serving player
 */
 
 #include <SFML/Graphics.hpp>
@@ -33,16 +33,21 @@ int main(int argc, char* argv[])
 
     srand(time(0));
     std::string gameState = "start";
+    bool isP1serve = true;
 
     /* Font/Text setup */
     sf::Font font;
     font.loadFromFile("font.ttf");
 
-    sf::Text text("Hello, " + gameState + " state!", font);
-    text.setCharacterSize(TEXT_SIZE);
+    sf::Text greeting("Welcome to Pong!", font);
+    greeting.setCharacterSize(TEXT_SIZE);
+    sf::FloatRect greetBox = greeting.getGlobalBounds();
+    greeting.setPosition((WINDOW_WIDTH / 2 - (greetBox.width / 2)), 60);
 
-    sf::FloatRect textBox = text.getGlobalBounds();
-    text.setPosition((WINDOW_WIDTH / 2 - (textBox.width / 2)), 60);
+    sf::Text instruction("Press Enter to begin!", font);
+    instruction.setCharacterSize(TEXT_SIZE);
+    sf::FloatRect instructBox = instruction.getGlobalBounds();
+    instruction.setPosition((WINDOW_WIDTH / 2 - (instructBox.width / 2)), 60 + (TEXT_SIZE * 1.25f));
 
     /* Paddle setup */
     Paddle p1(PADDLE_X_OFFSET, PLAYER1Y, PADDLE_WIDTH, PADDLE_HEIGHT);
@@ -80,7 +85,6 @@ int main(int argc, char* argv[])
 
         sf::Event event;
         while (window.pollEvent(event))
-
         {
             /* Game exit on Esc */
             if ((event.type == sf::Event::Closed) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
@@ -99,17 +103,18 @@ int main(int argc, char* argv[])
             {
                 if (gameState == "start")
                 {
-                    gameState = "play";
-                    text.setString("Hello, " + gameState + " state!");
+                    gameState = "serve";
+                    greeting.setString("Player 1's serve!");
+                    instruction.setString("Press Enter to serve!");
                 }
 
-                else
+                else if (gameState == "serve")
                 {
-                    gameState = "start";
-                    text.setString("Hello, " + gameState + " state!");
-
-                    ball.reset();
+                    gameState = "play";
+                    greeting.setString("");
+                    instruction.setString("");
                 }
+
             }
         }
 
@@ -186,11 +191,35 @@ int main(int argc, char* argv[])
                 ball.yPos = WINDOW_HEIGHT - ball.size.y;
                 ball.dY = -ball.dY;
             }
+
+            // TODO: left and right edge catch - increment appropriate score and reset ball
+            if(ball.xPos >= WINDOW_WIDTH - BALL_SIZE)
+            {
+                player1score++;
+                p1scoreboard.setString(std::to_string(player1score));
+                ball.reset();
+                gameState = "serve";
+                greeting.setString("Player 2's serve!");
+                instruction.setString("Press Enter to serve!");
+                isP1serve = false;
+            }
+
+            if(ball.xPos <= 0)
+            {
+                player2score++;
+                p2scoreboard.setString(std::to_string(player2score));
+                ball.reset();
+                gameState = "serve";
+                greeting.setString("Player 1's serve!");
+                instruction.setString("Press Enter to serve!");
+                isP1serve = true;
+            }
         }
 
         /** Draw **/
         window.clear(color);
-        window.draw(text);
+        window.draw(greeting);
+        window.draw(instruction);
         window.draw(p1scoreboard);
         window.draw(p2scoreboard);
         p1.render(window);
