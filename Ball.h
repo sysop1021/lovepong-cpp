@@ -12,7 +12,7 @@ public:
 
     void update(float dt);
     void render(sf::RenderWindow& window);
-    void reset();
+    void reset(bool isP1serve);
     bool checkCollision(Paddle& paddle);
 
     sf::RectangleShape ball;

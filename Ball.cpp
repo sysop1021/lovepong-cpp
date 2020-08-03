@@ -10,7 +10,7 @@ Ball::Ball(float x, float y, float w, float h)
     ball.setSize(size);
     ball.setPosition(xPos, yPos);
 
-    reset();
+    reset(true);
 
 }
 
@@ -27,13 +27,23 @@ void Ball::update(float dt)
     ball.setPosition(xPos, yPos);
 }
 
-void Ball::reset()
+void Ball::reset(bool isP1serve)
 {
     xPos = ((1280 / 2) - (size.x / 2));
     yPos = ((720 / 2) - (size.y / 2));
 
     // randInSomeRange = (rand() % (max-min + 1)) + min;
-    dX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
+    //dX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
+    if (isP1serve)
+    {
+        dX = 300;
+    }
+
+    else
+    {
+        dX = -300;
+    }
+
     dY = (rand() % (150 + 150 + 1)) - 150;
 
     ball.setPosition(xPos, yPos);

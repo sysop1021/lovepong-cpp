@@ -1,8 +1,3 @@
-/**
-    pong-9: score update
-    serve goes away from serving player
-*/
-
 #include <SFML/Graphics.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
@@ -26,7 +21,7 @@ int main(int argc, char* argv[])
 {
     /** Initialization **/
     /* Window Setup */
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-7");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-9");
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
     sf::Color color(40, 45, 52);
@@ -197,22 +192,23 @@ int main(int argc, char* argv[])
             {
                 player1score++;
                 p1scoreboard.setString(std::to_string(player1score));
-                ball.reset();
+                isP1serve = false;
+                ball.reset(isP1serve);
                 gameState = "serve";
                 greeting.setString("Player 2's serve!");
                 instruction.setString("Press Enter to serve!");
-                isP1serve = false;
             }
 
             if(ball.xPos <= 0)
             {
                 player2score++;
                 p2scoreboard.setString(std::to_string(player2score));
-                ball.reset();
+                isP1serve = true;
+                ball.reset(isP1serve);
                 gameState = "serve";
                 greeting.setString("Player 1's serve!");
                 instruction.setString("Press Enter to serve!");
-                isP1serve = true;
+
             }
         }
 
