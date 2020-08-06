@@ -1,4 +1,10 @@
+/**
+    TODO: bug: after game is won and reset, the serving player callout is incorrect
+    although serve moves in correct direction
+*/
+
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <math.h>               // needed for ceil()
 #include <string>               // game state identifier - should probably use c-strings
 
@@ -16,12 +22,13 @@ const float PADDLE_X_OFFSET = 30.f;
 const float BALL_SIZE = 12.f;
 const int TEXT_SIZE = 24;
 const float SPEED_UP_FACTOR = 1.03f;
+const int MAX_SCORE = 10;
 
 int main(int argc, char* argv[])
 {
     /** Initialization **/
     /* Window Setup */
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-10");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-11");
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
     sf::Color color(40, 45, 52);
@@ -44,6 +51,22 @@ int main(int argc, char* argv[])
     instruction.setCharacterSize(TEXT_SIZE);
     sf::FloatRect instructBox = instruction.getGlobalBounds();
     instruction.setPosition((WINDOW_WIDTH / 2 - (instructBox.width / 2)), 60 + (TEXT_SIZE * 1.25f));
+
+    /* Sound setup */
+    sf::SoundBuffer paddleHitBuffer;
+    paddleHitBuffer.loadFromFile("sounds/paddle_hit.wav");
+    sf::Sound paddleHitSound;
+    paddleHitSound.setBuffer(paddleHitBuffer);
+
+    sf::SoundBuffer wallHitBuffer;
+    wallHitBuffer.loadFromFile("sounds/wall_hit.wav");
+    sf::Sound wallHitSound;
+    wallHitSound.setBuffer(wallHitBuffer);
+
+    sf::SoundBuffer scoreBuffer;
+    scoreBuffer.loadFromFile("sounds/score.wav");
+    sf::Sound scoreSound;
+    scoreSound.setBuffer(scoreBuffer);
 
     /* Paddle setup */
     Paddle p1(PADDLE_X_OFFSET, PLAYER1Y, PADDLE_WIDTH, PADDLE_HEIGHT);
@@ -157,6 +180,7 @@ int main(int argc, char* argv[])
             {
                 ball.dX = -ball.dX * SPEED_UP_FACTOR;
                 ball.xPos = p1.xPos + p1.size.x;
+                paddleHitSound.play();
 
                 if (ball.dY > 0)
                 {
@@ -173,6 +197,7 @@ int main(int argc, char* argv[])
             {
                 ball.dX = -ball.dX * SPEED_UP_FACTOR;
                 ball.xPos = p2.xPos - ball.size.x;
+                paddleHitSound.play();
 
                 if (ball.dY > 0)
                 {
@@ -189,20 +214,23 @@ int main(int argc, char* argv[])
             {
                 ball.yPos = 0;
                 ball.dY = -ball.dY;
+                wallHitSound.play();
             }
 
             if (ball.yPos + ball.size.y >= WINDOW_HEIGHT)
             {
                 ball.yPos = WINDOW_HEIGHT - ball.size.y;
                 ball.dY = -ball.dY;
+                wallHitSound.play();
             }
 
             if (ball.xPos >= WINDOW_WIDTH)
             {
                 player1score++;
                 p1scoreboard.setString(std::to_string(player1score));
+                scoreSound.play();
 
-                if (player1score == 10)
+                if (player1score == MAX_SCORE)
                 {
                     winningPlayer = 1;
                     gameState = "done";
@@ -224,8 +252,9 @@ int main(int argc, char* argv[])
             {
                 player2score++;
                 p2scoreboard.setString(std::to_string(player2score));
+                scoreSound.play();
 
-                if (player2score == 10)
+                if (player2score == MAX_SCORE)
                 {
                     winningPlayer = 2;
                     gameState = "done";
