@@ -33,7 +33,6 @@ void Ball::reset(bool isP1serve)
     yPos = ((720 / 2) - (size.y / 2));
 
     // randInSomeRange = (rand() % (max-min + 1)) + min;
-    //dX = (rand() % (2 - 1 + 1)) + 1 == 1 ? 300 : -300;
     if (isP1serve)
     {
         dX = 300;
@@ -56,7 +55,6 @@ void Ball::render(sf::RenderWindow& window)
 
 bool Ball::checkCollision(Paddle& paddle)
 {
-    // this is full-on banana cakes
     if( !(xPos > (paddle.xPos + paddle.size.x)) &&
         !((xPos + size.x) < paddle.xPos) &&
         !(yPos > (paddle.yPos + paddle.size.y)) &&

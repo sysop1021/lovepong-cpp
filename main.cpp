@@ -21,14 +21,15 @@ int main(int argc, char* argv[])
 {
     /** Initialization **/
     /* Window Setup */
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-9");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "pong-10");
     window.setFramerateLimit(60);
-    window.setVerticalSyncEnabled(true); // seems to help with the jaggedy movement
+    window.setVerticalSyncEnabled(true);
     sf::Color color(40, 45, 52);
 
     srand(time(0));
     std::string gameState = "start";
     bool isP1serve = true;
+    unsigned short winningPlayer = 0;
 
     /* Font/Text setup */
     sf::Font font;
@@ -67,8 +68,6 @@ int main(int argc, char* argv[])
     fpsCtr.setPosition(5.f, 5.f);
 
     bool showDebug = false;
-
-    // Used as a buffer timer so we don't update the FPS counter every frame
     float smoothTimer = 0.f;
 
     sf::Clock clock;
@@ -110,11 +109,22 @@ int main(int argc, char* argv[])
                     instruction.setString("");
                 }
 
+                else if (gameState == "done")
+                {
+                    player1score = 0;
+                    player2score = 0;
+                    p1scoreboard.setString(std::to_string(player1score));
+                    p2scoreboard.setString(std::to_string(player2score));
+                    ball.reset(winningPlayer == 2);
+                    winningPlayer == 1 ? greeting.setString("Player 1's serve!") : greeting.setString("Player 2's serve!");
+                    instruction.setString("Press Enter to serve!");
+                    winningPlayer = 0;
+                    gameState = "serve";
+                }
             }
         }
 
         /** Handle Input **/
-        // these silly long tertiary expressions mean I can now get rid of #include <algorithm>
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             p1.yPos = (0.f > p1.yPos - PADDLE_SPEED * dt.asSeconds() ? 0.f : p1.yPos - PADDLE_SPEED * dt.asSeconds());
@@ -187,28 +197,50 @@ int main(int argc, char* argv[])
                 ball.dY = -ball.dY;
             }
 
-            // TODO: left and right edge catch - increment appropriate score and reset ball
-            if(ball.xPos >= WINDOW_WIDTH - BALL_SIZE)
+            if (ball.xPos >= WINDOW_WIDTH)
             {
                 player1score++;
                 p1scoreboard.setString(std::to_string(player1score));
-                isP1serve = false;
-                ball.reset(isP1serve);
-                gameState = "serve";
-                greeting.setString("Player 2's serve!");
-                instruction.setString("Press Enter to serve!");
+
+                if (player1score == 10)
+                {
+                    winningPlayer = 1;
+                    gameState = "done";
+                    greeting.setString("Player 1 wins!");
+                    instruction.setString("Press Enter to restart!");
+                }
+
+                else
+                {
+                    isP1serve = false;
+                    ball.reset(isP1serve);
+                    gameState = "serve";
+                    greeting.setString("Player 2's serve!");
+                    instruction.setString("Press Enter to serve!");
+                }
             }
 
-            if(ball.xPos <= 0)
+            if (ball.xPos + BALL_SIZE <= 0)
             {
                 player2score++;
                 p2scoreboard.setString(std::to_string(player2score));
-                isP1serve = true;
-                ball.reset(isP1serve);
-                gameState = "serve";
-                greeting.setString("Player 1's serve!");
-                instruction.setString("Press Enter to serve!");
 
+                if (player2score == 10)
+                {
+                    winningPlayer = 2;
+                    gameState = "done";
+                    greeting.setString("Player 2 wins!");
+                    instruction.setString("Press Enter to restart!");
+                }
+
+                else
+                {
+                    isP1serve = true;
+                    ball.reset(isP1serve);
+                    gameState = "serve";
+                    greeting.setString("Player 1's serve!");
+                    instruction.setString("Press Enter to serve!");
+                }
             }
         }
 
