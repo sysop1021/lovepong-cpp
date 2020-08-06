@@ -1,6 +1,10 @@
 /**
     TODO: bug: after game is won and reset, the serving player callout is incorrect
     although serve moves in correct direction
+
+    TODO: bug: when the greeting and instruction texts change, they are no longer centered.
+    on each change, I need to get a rect for globalbounds and reposition as I'm doing
+    when initing the texts.
 */
 
 #include <SFML/Graphics.hpp>

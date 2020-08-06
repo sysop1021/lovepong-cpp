@@ -1,5 +1,6 @@
 # excluding assets
 *.ttf
+*.wav
 
 # linux makefile
 makefile
